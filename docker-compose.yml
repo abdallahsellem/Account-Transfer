@@ -14,7 +14,9 @@ services:
 
 
 
-  frontend:   
+  frontend:
+    volumes:
+      - ./frontend:/app
     env_file:
       .env 
 
