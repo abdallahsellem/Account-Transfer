@@ -1,11 +1,14 @@
+from decimal import Decimal
 import uuid
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
+from django.urls import NoReverseMatch
 from rest_framework.views import APIView
 from .models import Account
 from rest_framework import status
 from rest_framework.response import Response
 import pandas as pd
 from .serializers import AccountSerializer
+from django.db import transaction
 # Create your views here.
 
 
@@ -58,12 +61,40 @@ class AccountsListView(APIView):
 class AccountDetailView(APIView):
     def get(self, request, account_id, format=None):
         try:
-            print(account_id)
             account_uuid = account_id
             customer = Account.objects.get(id=account_uuid)
             serializer = AccountSerializer(customer)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
         except Account.DoesNotExist:
             return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError:
-            return Response({"error": "Invalid UUID format"}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        
+            
+        
+class TransferFundsView(APIView):
+    def post(self, request, *args, **kwargs):
+        request_data = request.data 
+        try:
+            sender = get_object_or_404(Account, id=request_data["sender_id"])
+            receiver = get_object_or_404(Account, id=request_data["receiver_id"])
+            
+            if sender.balance < request_data['amount']:
+                return Response({'error': 'Insufficient funds'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            with transaction.atomic():
+                sender.balance -= Decimal(request_data.get("amount"))
+                receiver.balance += Decimal(request_data.get("amount"))
+                sender.save()
+                receiver.save()
+                       
+            return Response({"message": "Transfer completed successfully"}, status=status.HTTP_200_OK)
+        
+        except KeyError:
+            return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+            

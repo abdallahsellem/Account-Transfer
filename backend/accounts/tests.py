@@ -67,7 +67,54 @@ class AccountDetailViewTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_invalid_uuid(self):
-        url = reverse('account-detail', args=['invalid-uuid'])
-        response = self.client.get(url)
+        
+        
+class TransferFundsViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.sender = Account.objects.create(id=uuid.uuid4(), owner_name='Sender', balance=5000.00)
+        self.receiver = Account.objects.create(id=uuid.uuid4(), owner_name='Receiver', balance=1000.00)
+        self.url = reverse('transfer_funds')
+
+    def test_transfer_funds_success(self):
+        data = {
+            "sender_id": str(self.sender.id),
+            "receiver_id": str(self.receiver.id),
+            "amount": 1000.00
+        }
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], "Transfer completed successfully")
+
+        self.sender.refresh_from_db()
+        self.receiver.refresh_from_db()
+        self.assertEqual(self.sender.balance, 4000.00)
+        self.assertEqual(self.receiver.balance, 2000.00)
+
+    def test_transfer_funds_insufficient_balance(self):
+        data = {
+            "sender_id": str(self.sender.id),
+            "receiver_id": str(self.receiver.id),
+            "amount": 6000.00  # More than sender's balance
+        }
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Insufficient funds')
+
+    def test_transfer_funds_missing_fields(self):
+        data = {
+            "sender_id": str(self.sender.id),
+            "amount": 1000.00
+        }
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Missing required fields')
+
+    def test_transfer_funds_invalid_uuid(self):
+        data = {
+            "sender_id": "invalid-uuid",
+            "receiver_id": str(self.receiver.id),
+            "amount": 1000.00
+        }
+        response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

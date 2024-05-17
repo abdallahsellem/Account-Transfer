@@ -1,7 +1,9 @@
 version: '3.7'
 
 services:
-  backend: 
+  backend:
+    volumes:
+      - ./backend:/app
     env_file:
       .env
 
