@@ -1,0 +1,9 @@
+asgiref
+Django
+psycopg2-binary
+sqlparse
+tzdata
+whitenoise
+gunicorn
+djangorestframework
+pandas
