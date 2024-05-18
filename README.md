@@ -2,15 +2,15 @@
 
 ## Overview
 
-This project demonstrates how to integrate a Django backend with a React frontend. The Django backend provides APIs for account management, including importing accounts from a CSV file, listing accounts, retrieving account details, and transferring funds between accounts.
+This project demonstrates how to integrate a **Django** backend with a **React** frontend using **Docker**. The Django backend provides APIs for account management, including importing accounts from a CSV file, listing accounts, retrieving account details, and transferring funds between accounts.
 
 
 ## Functionality 
 
-• Import accounts from CSV files.
-• List all accounts.
-• Get account information.
-• Transfer funds between two accounts.
+- Import accounts from CSV files.
+- List all accounts.
+- Get account information.
+- Transfer funds between two accounts.
 
 
 ## Prerequisites
