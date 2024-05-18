@@ -18,7 +18,7 @@ This project demonstrates how to integrate a **Django** backend with a **React**
 - Docker
 - Docker Compose
 
-## Backend Setup
+## Project Setup
 
 ### 1. Clone the Repository
 
